@@ -1,0 +1,36 @@
+{# templates/gsbdd/index.html.twig #}
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des GSBdd{% endblock %}
+
+{% block body %}
+    <h1>Liste des Gsbdd</h1>
+
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nom</th>
+            <th>Code</th>
+            <th>Indic Ecole</th>
+            <th>Indic Hors Ecole</th>
+            <th>Indic Opex Isole</th>
+            <th>Indic Opex Unite</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for gsbdd in gsbdds %}
+            <tr>
+                <td>{{ gsbdd.idGsbdd }}</td>
+                <td>{{ gsbdd.nomGsbdd }}</td>
+                <td>{{ gsbdd.code }}</td>
+                <td>{{ gsbdd.indicEcole ? 'Oui' : 'Non' }}</td>
+                <td>{{ gsbdd.indicHorsEcole ? 'Oui' : 'Non' }}</td>
+                <td>{{ gsbdd.indicOpexIsole ? 'Oui' : 'Non' }}</td>
+                <td>{{ gsbdd.indicOpexUnite ? 'Oui' : 'Non' }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

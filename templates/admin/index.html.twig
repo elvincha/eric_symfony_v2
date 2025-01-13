@@ -1,0 +1,34 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Admin Home{% endblock %}
+
+{% block body %}
+
+
+    <div class = "top">
+        <div class ="profile">
+            <img class="profil-img" src="{{ asset('images/logo-ministere.png') }}" alt="Profil" width="100" height="75">
+            <img class="profil-img" src="{{ asset('images/logo_ciec.PNG') }}" alt="Profil" width="150" height="75">
+        </div>
+        <H1>Evaluation des Résultats des Indicateurs du soutien Commissariat</H1>
+
+        <a href="{{ path('index') }}" class="btn-custom">Accéder à la partie user</a>
+        <a class="btn-custom">Se déconecter</a>
+    </div>
+
+    <div class="container_global">
+        <div class="container_left">
+            <ul class = table>
+                <li><a href="{{ path('gsbdd_manage') }}"> gérer les gsbdds</a></li>
+                <li><a href="{{ path('user_manage') }}"> gérer les users</a></li>
+                <li><a> gérer les admins</a>
+                <li><a href="{{ path('app_export_csv') }}"> Export csv </a></li>
+                <li><a href="{{ path('annonce_manage') }}"> gérer les anonces</a></li>
+                <li><a> gerer les paramètres </a></li>
+            </ul>
+        </div>
+        <div class="container_right">
+
+        </div>
+    </div>
+{% endblock %}

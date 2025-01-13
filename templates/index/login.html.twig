@@ -1,0 +1,51 @@
+{# templates/security/login.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Login{% endblock %}
+
+{% block body %}
+    <div class = container_login>
+        <form id="loginForm" method="post">
+            <label for="user_session">User Session:</label>
+            <input type="text" id="user_session" name="user_session" required autofocus>
+            <label> Mot de passe : </label>
+            <input type ="text">
+            <button type="button" onclick="login_user(event)">Se connecter</button> {# Change to type="button" #}
+        </form>
+    </div>
+
+
+    <div id="alert" style="display:none;"></div> <!-- For displaying alerts -->
+
+    <script>
+        function login_user(event) { {# Accept event as parameter #}
+            event.preventDefault(); // Prevent default form submission
+
+            var userSession = document.getElementById('user_session').value;
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '{{ path('app_login') }}', true);
+
+            xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+
+                    if (xhr.status === 200) {
+                        var response = JSON.parse(xhr.responseText);
+                        alert(response.message); // Show success message
+
+                        // Redirect after alert
+                        setTimeout(function() {
+                            window.location.href = response.redirect; // Redirect to the home page
+                        }, 1000); // 2-second delay before redirect
+                    } else {
+                        var errorResponse = JSON.parse(xhr.responseText);
+                        alert('Erreur : ' + errorResponse.message);
+                    }
+                }
+            };
+            xhr.send(JSON.stringify({ user_session: userSession})); // Ensure this matches your server's expected key
+        }
+    </script>
+{% endblock %}

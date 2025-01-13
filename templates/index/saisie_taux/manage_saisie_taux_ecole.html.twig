@@ -1,0 +1,515 @@
+
+{# templates/saisie_taux/new.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class = "top">
+        <div class ="profile">
+            <img class="profil-img" src="{{ asset('images/logo-ministere.png') }}" alt="Profil" width="100" height="75">
+            <img class="profil-img" src="{{ asset('images/logo_ciec.PNG') }}" alt="Profil" width="150" height="75">
+        </div>
+        <H1>Evaluation des Résultats des Indicateurs du soutien Commissariat</H1>
+
+        <a href="{{ path('admin_home') }}" class="btn-custom">Accéder à l'administration</a>
+        <a class="btn-custom">Se déconecter</a>
+    </div>
+    <div class="container_global">
+
+        <div class="container_left">
+            <ul class = table>
+                <li><a href="{{ path('index') }}" > acceuil</a>
+                <li><a href="{{ path('saisie-taux-hors-ecole') }}" > taux hors école</a>
+                <li><a href="{{ path('saisie-opex-isole') }}" > taux OPEX isolé</a>
+                <li><a href="{{ path('saisie-opex-unite') }}" > taux OPEX </a>
+            </ul>
+        </div>
+
+        <div class="container_taux">
+            <div class="select_input">
+                <label for="gsbddId">GSBdd :</label>
+                <select id="gsbddId" name="gsbddId" onchange="updatePeriod()">
+                    <option value="0">Choisir</option>
+                    {% for gsbdd in gsbdds %}
+
+                        <option value="{{ gsbdd.idgsbdd }}" {% if gsbdd.idgsbdd == id_gsbdd %}selected{% endif %}>{{ gsbdd.nomgsbdd }}</option>
+                    {% endfor %}
+                </select>
+                <input type="hidden" id="gsbddId" name="gsbddId" readonly>
+                <label>Période :</label>
+                <input type="month" id="periode" name="periode" onchange="updatePeriod()" value="{{ periode }}">
+                <input type="hidden" value="{{ id_user }}">
+                <input type="hidden" id="user_acess_id">
+                <input type="hidden" id="saisie_id">
+            </div>
+
+            <div class="tab_form">
+                <div class="container_tab_taux">
+                    <table border ="1">
+                        <thead>
+                        <tr>
+                            <th>Armée</th>
+                            <th>Session</th>
+                            <th>effectif prevus</th>
+                            <th>effectif incorporé</th>
+                            <th>effectif equipé</th>
+                            <th>%</th>
+                            <th>Article (manquants)</th>
+                            <th>commentaire</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for saisie in saisiesTaux %}
+                            <tr>
+                                <td>
+                                    {% if saisie.armee is not null %}
+                                        {{ saisie.armee.nomArmee }}
+                                    {% else %}
+                                        Non concerné
+                                    {% endif %}
+                                </td>
+                                <td>{{saisie.session}}</td>
+                                <td>{{ saisie.effectifPrev }}</td>
+                                <td>{{ saisie.effectifInc }}</td>
+                                <td>{{ saisie.effectifEquip }}</td>
+                                <td>
+                                    {% if saisie.effectifInc != 0 %}
+                                        {{ (saisie.effectifEquip / saisie.effectifInc * 100) | round(2) }} %
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </td>
+                                <td class="article-manquant" data-saisie-id="{{ saisie.id }}">
+                                    <!-- Articles manquants ici -->
+                                    <div class="articles-list"></div> <!-- Ici on va afficher les articles -->
+                                    <button onclick="add_article({{ saisie.id }},{{ saisie.effectifEquip }} , {{ saisie.effectifInc }})">+</button>
+                                </td>
+                                <td>{{ saisie.commentaire }}</td>
+                                <td><button onclick="modif_saisie({{ saisie.id }})">modifier </button></td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="7">Aucune donnée disponible</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+
+                </div>
+                <div class="container_form_taux">
+                    <form class="form-saisie-taux" id="saisie-taux-form">
+                        <!-- Champ Type (Select) -->
+                        <label for="armee">Armée</label>
+                        <select id="armee" name="id_armee">
+                            <option value="" disabled selected>Choisir une armée</option>
+                            <option value="1">AAE</option>
+                            <option value="2">ADT</option>
+                            <option value="3">Marine</option>
+                            <option value="4">SIA</option>
+                        </select>
+
+                        <label for="session">Session</label>
+                        <input type="text" id="session" name="session" placeholder="Numéro de session">
+
+                        <label for="effectif_prev">Effectif Prévu</label>
+                        <input type="number" id="effectif_prev" name="effectif_prev">
+
+                        <label for="effectif_inc">Effectif Inc.</label>
+                        <input type="number" id="effectif_inc" name="effectif_inc">
+
+                        <label for="effectif_equip">Effectif Equipé</label>
+                        <input type="number" id="effectif_equip" name="effectif_equip">
+
+                        <label for="commentaire">Commentaire</label>
+                        <textarea id="commentaire" name="commentaire" rows="4" placeholder="Entrez votre commentaire ici"></textarea>
+
+
+                        <label for="non_concerne">Non Concerné</label>
+                        <input type="checkbox" id="non_concerne" name="non_concerne" value="1" onclick="checkbox_non_concerne()">
+
+                        <button type="button" id="btn_enregistrer" onclick="add_saisie_taux()">Enregistrer</button>
+                        <button type="button" id="btn_non_concerne" onclick="add_saisie_taux2()" style="display: none;">Nonconcerné</button>
+                        <div id="action_buttons" style="display: none;">
+                            <button onclick="saveChanges()">Enregistrer</button>
+                            <button onclick="deleteEntry()">Supprimer</button>
+                            <button onclick="hideActionButtons()">Retour</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+    <script>
+        function get_user_session() {
+            return new Promise((resolve, reject) => {
+                const idUser = "{{ id_user }}"; // Assuming `id_user` is available in the template
+                const idGsbdd = document.getElementById('gsbddId').value;
+
+                // Envoi des données pour récupérer l'id_user_access
+                fetch('{{ path('get_id_user_session') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        id_user: idUser,
+                        id_gsbdd: idGsbdd
+                    })
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Erreur lors de la récupération de l\'id_user_access');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.id_user_access) {
+                            document.getElementById('user_acess_id').value = data.id_user_access; // Mettre à jour l'input avec l'id_user_access
+                            resolve(data.id_user_access); // Résoudre la promesse avec l'id_user_access
+                        } else {
+                            alert("Aucun accès utilisateur trouvé."); // Alerte si aucun accès trouvé
+                            reject('Aucun accès utilisateur trouvé');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Erreur:', error);
+                        alert('Une erreur est survenue lors de la récupération de l\'id_user_access.');
+                        reject(error);
+                    });
+            });
+        }
+
+        function add_saisie_taux() {
+            const effectif_prev = document.getElementById('effectif_prev').value;
+            const effectifInc = document.getElementById('effectif_inc').value;
+            const effectifEquip = document.getElementById('effectif_equip').value;
+
+            // Validation: Check if 'Effectif Equipé' is <= 'Effectif Inc.'
+            if (parseInt(effectifInc) > parseInt(effectif_prev)) {
+                alert("L'effectif incorporé doit être inférieur ou égal à l'effectif prévu.");
+                return; // Stop form submission
+            }
+            // Validation: Check if 'Effectif Equipé' is <= 'Effectif Inc.'
+            if (parseInt(effectifEquip) > parseInt(effectifInc)) {
+                alert("L'effectif équipé doit être inférieur ou égal à l'effectif incorporé.");
+                return; // Stop form submission
+            }
+
+            const formData = new FormData(document.getElementById('saisie-taux-form'));
+            const periodeInput = document.getElementById('periode').value;
+            const idArmee = document.getElementById('armee').value;
+            const idGsbdd = document.getElementById('gsbddId').value;
+            // Appeler la fonction get_user_session et attendre qu'elle se termine
+            get_user_session()
+                .then(id_user_acess => {
+                    formData.append('id_armee', idArmee); // Ajout de l'ID de l'armée
+                    formData.append('id_user_acess', id_user_acess);
+                    formData.append('date_edit', new Date().toISOString());
+                    formData.append('type', 'taux école');
+                    formData.append('periode', periodeInput);
+                    formData.append('id_gsbdd',idGsbdd);
+
+                    // Envoi des données via AJAX
+                    return fetch('{{ path('app_saisie_taux_new') }}', {
+                        method: 'POST',
+                        body: formData,
+                    });
+
+                })
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    }
+                    throw new Error('Erreur lors de l\'enregistrement');
+                })
+                .then(data => {
+                    console.log(data);
+                    alert(data.message);
+                    location.reload();
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    alert('Une erreur est survenue lors de l\'enregistrement.');
+                });
+        }
+
+        function add_saisie_taux2() {
+            // Empêche le rechargement de la page
+            //event.preventDefault();
+
+            const formData = new FormData(document.getElementById('saisie-taux-form'));
+            const periodeInput = document.getElementById('periode').value;
+            const idArmee = document.getElementById('armee').value;
+            const idGsbdd = document.getElementById('gsbddId').value;
+
+            get_user_session()
+                .then(id_user_acess => {
+                    formData.append('id_armee', null); // Ajout de l'ID de l'armée
+                    formData.append('id_user_acess', id_user_acess);
+                    formData.append('date_edit', new Date().toISOString());
+                    formData.append('type', 'taux école');
+                    formData.append('periode', periodeInput);
+                    formData.append('id_gsbdd',idGsbdd);
+
+                    // Envoi des données via AJAX
+                    return fetch('{{ path('app_saisie_taux_new_non_concerne') }}', {
+                        method: 'POST',
+                        body: formData,
+                    });
+                    document.getElementById('saisie-taux-form').addEventListener('submit', add_saisie_taux2);
+
+                })
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    }
+                    throw new Error('Erreur lors de l\'enregistrement');
+                })
+                .then(data => {
+                    console.log(data);
+                    alert(data.message);
+                    location.reload();
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    alert('Une erreur est survenue lors de l\'enregistrement.');
+                });
+        }
+
+        function checkbox_non_concerne() {
+            const isChecked = document.getElementById("non_concerne").checked;
+            const btnEnregistrer = document.getElementById("btn_enregistrer");
+            const btnNonConcerne = document.getElementById("btn_non_concerne");
+
+            // Les champs à désactiver et vider
+            const fields = [
+                document.getElementById("armee"),
+                document.getElementById("session"),
+                document.getElementById("effectif_prev"),
+                document.getElementById("effectif_inc"),
+                document.getElementById("effectif_equip"),
+                document.getElementById("commentaire")
+            ];
+
+            // Basculer l'affichage des boutons et l'état des champs
+            if (isChecked) {
+                btnEnregistrer.style.display = "none";
+                btnNonConcerne.style.display = "inline-block";
+
+                // Désactiver et vider les champs
+                fields.forEach(field => {
+                    field.value = "";
+                    field.disabled = true;
+                });
+            } else {
+                btnEnregistrer.style.display = "inline-block";
+                btnNonConcerne.style.display = "none";
+
+                // Réactiver les champs
+                fields.forEach(field => {
+                    field.disabled = false;
+                });
+            }
+        }
+
+        function updatePeriod() {
+            const periode = document.getElementById('periode').value;
+            const gsbdd = document.getElementById('gsbddId').value;
+
+            // Rediriger vers la même page avec la période et l'id_gsbdd comme paramètres de requête
+            if (periode && gsbdd) {
+                window.location.href = `?periode=${periode}&gsbdd=${gsbdd}`;
+            }
+        }
+
+        function select_gsbdd(){
+            // Récupère l'élément select
+            const selectElement = document.getElementById("gsbddSelect");
+
+            // Récupère l'ID sélectionné (la valeur de l'option sélectionnée)
+            const selectedId = selectElement.value;
+
+            // Met à jour le champ input avec l'ID sélectionné
+            document.getElementById("gsbddId").value = selectedId;
+            updatePeriod();
+        }
+
+        function add_article(saisie_id, effectif_equip, effectif_inc) {
+            if (effectif_equip >= effectif_inc) {
+                alert("Votre taux de satisfaction est de 100%");
+            } else {
+                alert("À venir");
+
+                // Rediriger vers la page /article/manquant avec l'id_saisie en paramètre
+                window.location.href = `/article/manquant?id_saisie=${saisie_id}`;
+            }
+        }
+
+        function modif_saisie(saisie_id) {
+            // Affiche les boutons d'action et masque le bouton Enregistrer
+            document.getElementById("saisie_id").value = saisie_id;
+            document.getElementById("action_buttons").style.display = "block";
+            document.getElementById("btn_enregistrer").style.display = "none";
+
+            // Requête pour récupérer les valeurs du tuple
+            fetch(`/get-saisie/${saisie_id}`, {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest' // Pour Symfony Ajax
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Remplir les champs avec les valeurs récupérées
+                        document.getElementById("armee").value = data.saisie.id_armee;
+                        document.getElementById("session").value = data.saisie.session;
+                        document.getElementById("effectif_prev").value = data.saisie.effectif_prev;
+                        document.getElementById("effectif_inc").value = data.saisie.effectif_inc;
+                        document.getElementById("effectif_equip").value = data.saisie.effectif_equip;
+                        document.getElementById("commentaire").value = data.saisie.commentaire;
+                    } else {
+                        alert('Erreur lors de la récupération des données');
+                    }
+                })
+                .catch(error => console.error('Erreur:', error));
+        }
+
+        function saveChanges() {
+            const saisieId = document.getElementById("saisie_id").value;
+            const id_armee = document.getElementById("armee").value;
+            const session = document.getElementById("session").value;
+            const effectifPrev = document.getElementById("effectif_prev").value;
+            const effectifInc = document.getElementById("effectif_inc").value;
+            const effectifEquip = document.getElementById("effectif_equip").value;
+            const commentaire = document.getElementById("commentaire").value;
+            fetch('/update-saisie-taux-ecole', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest' // For Symfony's Ajax detection
+                },
+                body: JSON.stringify({
+                    saisie_id: saisieId,
+                    id_armee: id_armee,
+                    session: session,
+                    effectif_prev: effectifPrev,
+                    effectif_inc: effectifInc,
+                    effectif_equip: effectifEquip,
+                    commentaire:commentaire
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Enregistrement mis à jour avec succès');
+                    } else {
+                        alert('Erreur lors de la mise à jour');
+                    }
+                })
+                .catch(error => console.error('Erreur:', error));
+        }
+
+        function deleteEntry() {
+            const saisieId = document.getElementById("saisie_id").value;
+
+            if (confirm("Êtes-vous sûr de vouloir supprimer cette saisie ?")) {
+                fetch(`/delete-saisie/${saisieId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest' // Pour Symfony Ajax
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Enregistrement supprimé avec succès');
+                            // Optionnel : mettre à jour l'interface utilisateur après suppression
+                        } else {
+                            alert('Erreur lors de la suppression');
+                        }
+                    })
+                    .catch(error => console.error('Erreur:', error));
+            }
+        }
+
+        function get_article_manquant(){
+            alert("test article manquants");
+        }
+
+    </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Sélectionne tous les éléments avec la classe 'article-manquant'
+            const cells = document.querySelectorAll(".article-manquant");
+
+            cells.forEach(cell => {
+                const saisieId = cell.dataset.saisieId; // Récupère l'ID saisie depuis l'attribut data-saisie-id
+
+                // Effectue une requête AJAX pour récupérer les articles manquants
+                fetch(`/article/manquant_list?id_saisie=${saisieId}`)
+                    .then(response => response.json())  // Convertit la réponse en JSON
+                    .then(data => {
+                        // Vérifie si la requête a réussi
+                        if (data.success && data.articles.length > 0) {
+                            const articlesListDiv = cell.querySelector(".articles-list"); // Trouve le div pour afficher les articles
+                            data.articles.forEach(article => {
+                                // Crée un élément HTML pour chaque article
+                                const articleElement = document.createElement("p");
+                                articleElement.textContent = `${article.nomArticle} : ${article.nb}`;
+
+                                // Crée un bouton "Supprimer" pour chaque article
+                                const deleteButton = document.createElement("button");
+                                deleteButton.textContent = "Supprimer";
+                                // Ajoute l'appel à la fonction delete_article_manquant et passe l'id de l'article
+                                deleteButton.onclick = function () {
+                                    delete_article_manquant(article.id, articleElement);
+                                };
+
+                                // Ajoute le bouton après l'article
+                                articleElement.appendChild(deleteButton);
+
+                                // Ajoute l'article et le bouton à la liste
+                                articlesListDiv.appendChild(articleElement);
+                            });
+                        } else {
+                            const articlesListDiv = cell.querySelector(".articles-list");
+                            // Affiche un message si aucun article n'est trouvé
+                            //articlesListDiv.textContent = "Aucun article manquant";
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Erreur lors de la récupération des articles manquants:', error);
+                    });
+            });
+        });
+
+        function delete_article_manquant(id, articleElement) {
+            // Demander confirmation avant la suppression
+            if (confirm("Êtes-vous sûr de vouloir supprimer cet article ?")) {
+                fetch(`/article/manquant/supprimer?id=${id}`, {
+                    method: 'DELETE',  // Assurez-vous que la méthode est 'DELETE'
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Supprime l'article de l'interface utilisateur si la suppression est réussie
+                            articleElement.remove();
+                            alert("Article supprimé avec succès");
+                        } else {
+                            alert("Erreur lors de la suppression de l'article");
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Erreur lors de la suppression de l\'article:', error);
+                        alert("Erreur lors de la suppression de l'article");
+                    });
+            }
+        }
+
+
+    </script>
+
+
+{% endblock %}

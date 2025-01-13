@@ -1,0 +1,263 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello AnnonceController!{% endblock %}
+
+{% block body %}
+    <div class = "top">
+        <div class ="profile">
+            <img class="profil-img" src="{{ asset('images/logo-ministere.png') }}" alt="Profil" width="100" height="75">
+            <img class="profil-img" src="{{ asset('images/logo_ciec.PNG') }}" alt="Profil" width="150" height="75">
+        </div>
+        <H1>Evaluation des Résultats des Indicateurs du soutien Commissariat</H1>
+
+        <a href="{{ path('index') }}" class="btn-custom">Accéder à la partie user</a>
+        <a class="btn-custom">Se déconecter</a>
+    </div>
+    <div class="container_global">
+        <div class="container_left">
+            <ul class = table>
+                <li><a href="{{ path('gsbdd_manage') }}">Voir la liste des Gsbdd</a></li>
+                <li><a href="{{ path('gsbdd_manage') }}"> gérer les gsbdds</a></li>
+                <li><a href="{{ path('user_manage') }}"> gérer les users</a></li>
+                <li><a> gérer les admins</a>
+                <li><a href="{{ path('app_export_csv') }}"> Export csv </a></li>
+                <li><a> gerer les paramètres </a></li>
+            </ul>
+        </div>
+        <div class="container_right_annonce">
+            <div class="annonce_form">
+
+                    <div class="buttons">
+                        <button onclick="showAddForm()">Ajouter</button>
+                        <button onclick="showEditForm()">Modifier ou Supprimer</button>
+                    </div>
+
+            </div>
+
+            <div class ="annonce_manage">
+
+                <!-- Formulaire d'ajout (initialement masqué) -->
+                <div class ="add_form" id="addForm" style="display: none;">
+                    <label>Titre :</label>
+                    <input type="text" id="addTitleInput" />
+
+                    <label>Sous-titre :</label>
+                    <input type="text" id="addSubtitleInput" />
+
+                    <label>Contenu :</label>
+                    <textarea id="addContentTextarea"></textarea>
+                    <div>
+                        <button onclick="addAnnonce()">Ajouter</button>
+                    </div>
+
+                </div>
+
+                <!-- Formulaire de modification/suppression (initialement masqué) -->
+                <div class ="add_form" id="editForm" style="display: none;">
+                    <select name="annonce" id="annonceSelect" onchange="loadAnnonceDetails()">
+                        <option disabled selected>Annonce à modifier</option>
+                        {% for annonce in annonces %}
+                            <option value="{{ annonce.id }}">{{ annonce.titleannonce }}</option>
+                        {% endfor %}
+                    </select>
+
+                    <label>Titre :</label>
+                    <input type="text" id="titleInput" />
+
+                    <label>Sous-titre :</label>
+                    <input type="text" id="subtitleInput" />
+
+                    <label>Contenu :</label>
+                    <textarea id="contentTextarea"></textarea>
+                    <div>
+                        <button onclick="editAnnonce()">Modifier</button>
+                        <button onclick="deleteAnnonce()">Supprimer</button>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <script>
+        function showAddForm() {
+            // Affiche le formulaire d'ajout et masque le formulaire de modification
+            document.getElementById('addForm').style.display = 'flex';
+            document.getElementById('editForm').style.display = 'none';
+        }
+
+        function showEditForm() {
+            // Affiche le formulaire de modification et masque le formulaire d'ajout
+            document.getElementById('editForm').style.display = 'flex';
+            document.getElementById('addForm').style.display = 'none';
+        }
+
+        function loadAnnonceDetails() {
+            const annonceId = document.getElementById('annonceSelect').value;
+
+            fetch(`/annonce/details/${annonceId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.error) {
+                        document.getElementById('titleInput').value = data.title_annonce;
+                        document.getElementById('subtitleInput').value = data.subtitle_annonce;
+                        document.getElementById('contentTextarea').value = data.text_annonce;
+                    } else {
+                        alert('Erreur : ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur de chargement des détails de l\'annonce :', error);
+                });
+        }
+
+        function addAnnonce() {
+            // Récupérer les valeurs des champs d'entrée
+            const title = document.getElementById('addTitleInput').value.trim();
+            const subtitle = document.getElementById('addSubtitleInput').value.trim();
+            const content = document.getElementById('addContentTextarea').value.trim();
+
+            // Vérification des champs pour s'assurer qu'ils ne sont pas vides
+            if (!title || !subtitle || !content) {
+                alert("Tous les champs doivent être remplis !");
+                return;
+            }
+
+            // Préparer les données à envoyer
+            const data = {
+                title_annonce: title,
+                subtitle_annonce: subtitle,
+                text_annonce: content
+            };
+
+            // Envoyer les données au serveur
+            fetch('/annonce/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json', // Indique le type de contenu envoyé
+                },
+                body: JSON.stringify(data) // Convertit les données en JSON
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Erreur lors de l'ajout de l'annonce");
+                    }
+                    return response.json(); // Convertit la réponse en JSON
+                })
+                .then(data => {
+                    // Traitez la réponse du serveur ici
+                    alert('Annonce ajoutée avec succès !');
+
+                    // Vous pouvez également vider les champs du formulaire après ajout
+                    document.getElementById('addTitleInput').value = '';
+                    document.getElementById('addSubtitleInput').value = '';
+                    document.getElementById('addContentTextarea').value = '';
+                    location.reload();
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    alert('Une erreur s\'est produite lors de l\'ajout de l\'annonce.');
+                });
+        }
+
+        function deleteAnnonce() {
+            // Récupérer l'ID de l'annonce sélectionnée
+            const annonceId = document.getElementById('annonceSelect').value;
+
+            // Vérifier si une annonce est sélectionnée
+            if (!annonceId) {
+                alert("Veuillez sélectionner une annonce à supprimer.");
+                return;
+            }
+
+            // Confirmation de la suppression
+            if (!confirm("Êtes-vous sûr de vouloir supprimer cette annonce ?")) {
+                return;
+            }
+
+            // Envoyer la requête DELETE au serveur
+            fetch(`/annonce/delete/${annonceId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Erreur lors de la suppression de l'annonce");
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    alert('Annonce supprimée avec succès !');
+
+                    // Actualisez la liste ou supprimez l'élément du select après suppression
+                    const selectElement = document.getElementById('annonceSelect');
+                    selectElement.remove(selectElement.selectedIndex);
+                    location.reload();  // Recharge la page après la mise à jour
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    alert("Une erreur s'est produite lors de la suppression de l'annonce.");
+                });
+        }
+
+        function editAnnonce() {
+            // Récupérer l'ID de l'annonce sélectionnée
+            const annonceId = document.getElementById('annonceSelect').value;
+
+            // Vérifier si une annonce est sélectionnée
+            if (!annonceId) {
+                alert("Veuillez sélectionner une annonce à modifier.");
+                return;
+            }
+
+            // Récupérer les nouvelles valeurs des champs d'entrée
+            const title = document.getElementById('titleInput').value.trim();
+            const subtitle = document.getElementById('subtitleInput').value.trim();
+            const content = document.getElementById('contentTextarea').value.trim();
+
+            // Vérification des champs pour s'assurer qu'ils ne sont pas vides
+            if (!title || !subtitle || !content) {
+                alert("Tous les champs doivent être remplis !");
+                return;
+            }
+
+            // Préparer les données à envoyer
+            const data = {
+                title_annonce: title,
+                subtitle_annonce: subtitle,
+                text_annonce: content
+            };
+
+            // Envoyer la requête PUT ou PATCH au serveur
+            fetch(`/annonce/edit/${annonceId}`, {
+                method: 'PUT', // Ou 'PATCH'
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data) // Convertit les données en JSON
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Erreur lors de la modification de l'annonce");
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    alert('Annonce modifiée avec succès !');
+                    location.reload();
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    alert("Une erreur s'est produite lors de la modification de l'annonce.");
+                });
+        }
+
+    </script>
+{% endblock %}

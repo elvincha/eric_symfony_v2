@@ -1,0 +1,14 @@
+{# templates/security/login.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Login{% endblock %}
+
+{% block body %}
+    <form method="post" action="{{ path('login') }}">
+        <label for="user_session">User Session:</label>
+        <input type="text" id="user_session" name="user_session" required autofocus>
+
+        <button type="submit">Login</button> //  a faire
+        <a href="{{ path('admin_home') }}" class="btn-custom">Accéder à la page d'acceuil</a>
+    </form>
+{% endblock %}

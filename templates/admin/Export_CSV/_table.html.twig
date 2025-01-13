@@ -1,0 +1,36 @@
+<table class="table_export">
+    <thead>
+    <tr>
+        <th>GSBSS</th>
+        <th>Armée</th>
+        <th>Période</th>
+        <th>Effectif Prévus</th>
+        <th>Effectif Incorporé</th>
+        <th>Effectif équipé</th>
+        <th>Pourcentage</th>
+        <th>Date Edition</th>
+        <th>user</th>
+        <th>commentaire</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for saisie in saisies_taux %}
+        <tr>
+            <td>GSBDD à faire</td>
+            <td>{{ saisie.armee ? saisie.armee.nomarmee : '' }}</td>
+            <td>{{ saisie.periode }}</td>
+            <td>{{ saisie.effectifPrev }}</td>
+            <td>{{ saisie.effectifInc }}</td>
+            <td>{{ saisie.effectifEquip }}</td>
+            <td>100% à faire</td>
+            <td>{{ saisie.dateedit|date('d/m/Y') }}</td>
+            <td>Elvin à faire</td>
+            <td>{{ saisie.commentaire }}</td>
+        </tr>
+    {% else %}
+        <tr>
+            <td colspan="10">Aucune donnée disponible pour ce filtre.</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>

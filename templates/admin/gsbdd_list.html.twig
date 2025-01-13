@@ -1,0 +1,148 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des Gsbdd{% endblock %}
+
+{% block body %}
+
+    <a href="{{ path('admin_home') }}" class="btn-custom">Retour</a>
+    <h1>Liste des Gsbdd</h1>
+
+    <table class="table">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nom</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for gsbdd in gsbdds %}
+            <tr>
+                <td>{{ gsbdd.id }}</td>
+                <td>
+                    <a class="btn-custom" href="#" onclick="selectGsbdd('{{ gsbdd.id }}', '{{ gsbdd.nom }}',
+                            '{{ gsbdd.indic_ecole }}','{{ gsbdd.indic_hors_ecole }}','{{ gsbdd.indic_opex_unite }}','{{ gsbdd.indic_opex_isole }}');">
+                        {{ gsbdd.nom }}
+                    </a>
+
+        {% else %}
+            <tr>
+                <td colspan="7">Aucun Gsbdd trouvé.</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Formulaire de modification -->
+    <form id="gsbddForm">
+        <input type="text" id="gsbddInputNom" placeholder="Nom du Gsbdd"/>
+        <input type="text" id="gsbddInputId" placeholder="ID du Gsbdd" readonly/>
+
+        <!-- Input radio pour indic_ecole -->
+        <div>
+            <label>Indic École:</label>
+            <label>
+                <input type="radio" id="gsbddInputIndicEcoleOui" name="indic_ecole" value="1"/> Oui
+            </label>
+            <label>
+                <input type="radio" id="gsbddInputIndicEcoleNon" name="indic_ecole" value="0"/> Non
+            </label>
+        </div>
+
+        <div>
+            <label>Indic Hors École:</label>
+            <label>
+                <input type="radio" id="gsbddInputIndicHorsEcoleOui" name="indic_hors_ecole" value="1"/> Oui
+            </label>
+            <label>
+                <input type="radio" id="gsbddInputIndicHorsEcoleNon" name="indic_hors_ecole" value="0"/> Non
+            </label>
+        </div>
+
+        <div>
+            <label>Indic Opex unite:</label>
+            <label>
+                <input type="radio" id="gsbddInputIndicOpexUniteOui" name="indic_opex_unite" value="1"/> Oui
+            </label>
+            <label>
+                <input type="radio" id="gsbddInputIndicOpexUniteNon" name="indic_opex_unite" value="0"/> Non
+            </label>
+        </div>
+
+        <div>
+        <label>Indic Opex isole:</label>
+        <label>
+            <input type="radio" id="gsbddInputIndicOpexIsoleOui" name="indic_opex_isole" value="1"/> Oui
+        </label>
+        <label>
+            <input type="radio" id="gsbddInputIndicOpexIsoleNon" name="indic_opex_isole" value="0"/> Non
+        </label>
+        </div>
+
+        <button type="button" onclick="updateGsbdd()">Modifier</button>
+    </form>
+
+    <!-- Div pour afficher les messages de retour -->
+    <div id="responseMessage"></div>
+
+    <script>
+        function selectGsbdd(id, nom, indic_ecole,indic_hors_ecole,indic_opex_unite,indic_opex_isole) {
+            document.getElementById('gsbddInputId').value = id;
+            document.getElementById('gsbddInputNom').value = nom;
+
+            // Sélectionnez la valeur appropriée du radio
+            if (indic_ecole == 1) {
+                document.getElementById('gsbddInputIndicEcoleOui').checked = true;
+            } else {
+                document.getElementById('gsbddInputIndicEcoleNon').checked = true;
+            }
+
+            if (indic_hors_ecole == 1) {
+                document.getElementById('gsbddInputIndicHorsEcoleOui').checked = true;
+            } else {
+                document.getElementById('gsbddInputIndicHorsEcoleNon').checked = true;
+            }
+
+
+            if (indic_opex_unite == 1) {
+                document.getElementById('gsbddInputIndicOpexUniteOui').checked = true;
+            } else {
+                document.getElementById('gsbddInputIndicOpexUniteNon').checked = true;
+            }
+
+            if (indic_opex_isole == 1) {
+                document.getElementById('gsbddInputIndicOpexIsoleOui').checked = true;
+            } else {
+                document.getElementById('gsbddInputIndicOpexIsoleNon').checked = true;
+            }
+        }
+
+        function updateGsbdd() {
+            var id = document.getElementById('gsbddInputId').value;
+            var nom = document.getElementById('gsbddInputNom').value;
+            var indic_ecole = document.querySelector('input[name="indic_ecole"]:checked').value;
+            var indic_hors_ecole = document.querySelector('input[name="indic_hors_ecole"]:checked').value;
+            var indic_opex_unite = document.querySelector('input[name="indic_opex_unite"]:checked').value;
+            var indic_opex_isole = document.querySelector('input[name="indic_opex_isole"]:checked').value;
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '{{ path('update_gsbdd') }}', true);
+            xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                    var responseMessage = document.getElementById('responseMessage');
+                    if (xhr.status === 200) {
+                        responseMessage.innerText = 'Gsbdd mis à jour avec succès';
+                    } else {
+                        responseMessage.innerText = 'Erreur lors de la mise à jour : ' + xhr.responseText;
+                    }
+                }
+            };
+            xhr.send(JSON.stringify({ id: id, nom: nom, indic_ecole: indic_ecole, indic_hors_ecole: indic_hors_ecole,
+                indic_opex_unite: indic_opex_unite, indic_opex_isole: indic_opex_isole }));
+        }
+
+    </script>
+
+
+
+{% endblock %}

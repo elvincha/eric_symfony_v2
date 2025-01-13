@@ -1,0 +1,354 @@
+/* styles.css */
+:root{
+    --red-mariane-625 : #f95c5e;
+    --red-mariane-625-hover : #fa9293;
+    --red-mariane-200: #5e2a2b;
+    --red-mariane-200-hover : #9c4a4c;
+    --top : #fff;
+    --navbar : #e1000f;
+    --left-side : #dcdcfc;
+    --right-top : #cacafb;
+    --right-side : #e3e3fd;
+    --formulaire : #cacafb;
+    --button : #6a6af4;
+    --footer : #21213f;
+    --bleu-france : #000091;
+    --bleu-france-hover : #1212ff;
+
+}
+
+.top {
+    display: flex;
+    height: 8vh;
+    margin-top:2vh;
+    margin-bottom: 1vh;
+    margin-left : 1vw;
+    margin-right : 1vw;
+    flex-direction : row;
+    align-items: center; ;
+    background-color: #fff;
+
+    border-radius: 10px;
+    justify-content: space-between;
+
+}
+.profile{
+    display:flex;
+}
+h1 {
+    font-size: 24px;
+    color: #333;
+    margin-bottom: 20px;
+    text-align : center;
+}
+input[type="text"],
+input[type="number"],
+input[type="text"],
+select{
+
+    min-width: 200px;
+    width: 15vw;
+    height: 5vh;
+    min-height : 30px;
+    margin-top : 1vh;
+    margin-bottom :1vh;
+    text-align: center;
+    padding : 0;
+    background-color: var(--formulaire);
+    font-size: 1vw;
+    border : none;
+
+}
+
+
+.btn-custom {
+    height: 3vh;
+    min-height: 30px;
+    display: inline-block;
+    margin: 0;
+    padding: 7px 14px;
+    font-size: 1vw;
+    font-weight: bold;
+    background-color: var(--bleu-france);
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    text-align: center;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+    cursor: pointer;
+
+
+
+}
+
+.btn-custom:hover {
+    background-color: #0056b3;
+}
+.container {
+    display: flex;
+    justify-content: space-between; /* Aligne les éléments avec de l'espace entre eux */
+
+}
+.container_login {
+    display: flex;
+    justify-content: center; /* Centrer horizontalement */
+    align-items: center; /* Centrer verticalement */
+    height: 100vh; /* Pleine hauteur de la fenêtre */
+    background-color: #f9f9f9; /* Fond optionnel */
+}
+
+#loginForm {
+    display: flex;
+    flex-direction: column; /* Alignement vertical */
+    width: 300px; /* Largeur fixe du formulaire */
+    gap: 15px; /* Espacement vertical entre les groupes */
+    padding: 20px;
+    border: 1px solid #ccc; /* Bordure légère */
+    border-radius: 8px; /* Coins arrondis */
+    background-color: #fff; /* Fond blanc */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Ombre douce */
+    text-align: center;
+    align-items: center;
+}
+
+
+.div_vertical_left {
+    background-color: var(--right-side); /* Couleur de fond pour le formulaire */
+    padding: 20px; /* Espacement interne */
+    border-radius: 5px; /* Coins arrondis */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Ombre */
+    margin: auto; /* Centrer le formulaire */
+    height: 74.5vh; /* Hauteur fixe */
+    width: 30%;
+    overflow-y: auto; /* Active le défilement vertical si le contenu déborde */
+}
+.div_vertical_right {
+    background-color: var(--right-side); /* Couleur de fond pour le formulaire */
+    padding: 20px; /* Espacement interne */
+    border-radius: 5px; /* Coins arrondis */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Ombre */
+    margin: auto; /* Centrer le formulaire */
+    height: 74.5vh; /* Hauteur fixe */
+    width: 60%;
+    overflow-y: auto; /* Active le défilement vertical si le contenu déborde */
+}
+.vertical table {
+    width: 80%;
+    border-collapse: collapse; /* Supprime l'espacement entre les bordures des cellules */
+    border-spacing: 0; /* Supprime l'espacement entre les cellules */
+    border: 1px solid gray; /* Bordure de la table */
+    overflow: auto;
+}
+
+/*th, td {
+/*    padding: 10px; /* Ajoute de l'espacement à l'intérieur des cellules */
+/*    text-align: left; /* Aligne le texte à gauche */
+/*    border: 1px solid gray; /* Bordures des cellules */
+/*}
+
+ */
+.container_global{
+        display: flex;
+        justify-content: space-between; /* Espace entre les conteneurs */
+        justify-content: center; /* Centrer verticalement */
+        align-items: center; /* Centrer horizontalement */
+        margin: 0 auto;
+        padding: 10px;
+
+}
+.container_left{
+
+    width: 20%;
+    height: 80vh;
+    background-color: var(--left-side);
+    align-items: flex-start;
+    display: flex;
+    flex-direction: column;
+    border : 2px 0 2px 2px solid var(--formulaire);
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+    box-shadow: 2px 1px #333;
+
+
+
+}
+.container_right{
+
+    padding: 30px 10px 30px 10px;
+    display: flex; /* Aligne les sous-conteneurs horizontalement */
+    flex-direction: column;
+    justify-content: space-between; /* Espace entre les sous-conteneurs */
+    width: 80%;
+    overflow:auto;
+    background-color: var(--right-side);
+    min-height: 71.5vh;
+}
+.container_right_gsbdd{
+    padding: 3.5vh 10px 30px 10px;
+    display: flex; /* Aligne les sous-conteneurs horizontalement */
+    justify-content: space-between; /* Espace entre les sous-conteneurs */
+    width: 80%;
+    overflow:auto;
+    background-color: var(--right-side);
+}
+.container_right_annonce {
+     padding: 30px 10px;
+     display: flex;
+     flex-direction: column; /* Aligne les sous-conteneurs verticalement */
+     gap: 2.2vh; /* Espace de 10px entre chaque div */
+     width: 80%;
+     overflow: auto;
+     background-color: var(--right-side);
+     border : 2px 0 2px 2px solid var(--formulaire);
+     min-height: 71.5vh;
+ }
+.annonce {
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--left-side);
+
+}
+.annonce_form {
+    display: flex;
+    flex-direction: column; /* Aligne les éléments verticalement */
+    align-items: center;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: var(--formulaire);
+}
+.annonce_manage{
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--left-side);
+    align-items: center;
+}
+.annonce textarea {
+    height: 100px;
+    resize: vertical;
+}
+.container_gsbdd {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    width: 30%;
+    max-height: 500px;
+    border : solid;
+    background-color: var(--formulaire);
+}
+.container_gsbdd input{
+    background-color: var(--right-side);
+}
+.add_form{
+    display: flex;
+    flex-direction: column;
+}
+.table-wrapper {
+    overflow-y: auto;
+    max-height: 500px; /* Define a specific height for the wrapper */
+}
+
+.container_gsbdd table {
+    width: 100%;
+
+}
+.user_list{
+    max-height: 100px;
+    overflow-y: auto;
+}
+
+.annonces-container{
+    overflow-y: auto;
+    max-height: 60vh;
+}
+.container_taux{
+    display:flex;
+    flex-direction: column;
+    width: 100%;
+    height: 80vh;
+    background-color: var(--right-side);
+}
+.select_input {
+    padding-left: 10px;
+    margin-top: 0;
+    display: flex;
+    flex-direction: row;
+    height: 7vh;
+    min-height: 40px;
+    gap: 1vw; /* Ajoute un espace entre chaque */
+    flex-wrap: nowrap;;
+    align-items: center; /* Centrage vertical */
+    background-color: var(--right-top);
+}
+.select_input input,
+.select_input select{
+
+    min-width: 200px;
+    width: 15vw;
+    height: 5vh;
+    min-height : 30px;
+    margin-top : 1vh;
+    margin-bottom :1vh;
+    text-align: center;
+    padding : 0;
+    background-color: var(--left-side);
+    font-size: 1vw;
+    border : none;
+}
+
+.tab_form{
+    padding-top: 10px;
+    padding-left: 10px;
+    display: flex;
+}
+.container_tab_taux {
+    flex: 0 0 70%;
+    margin-right: 20px;
+    align-items: flex-start; /* Aligns content at the top */
+}
+
+.container_tab_taux table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.form-saisie-taux{
+    flex-direction: column;
+    display: flex;
+    padding-right: 10px;
+}
+.header.container.right {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    border: 1px solid black; /* Ajoute une bordure noire */
+    padding: 10px; /* Ajoute un espace intérieur pour éviter que le contenu touche la bordure */
+    background-color: #f9f9f9; /* Ajoute une couleur de fond légère pour mieux visualiser la zone */
+    /*margin: 10px 0; /* Ajoute un espacement externe pour le séparer d'autres éléments */
+}
+.container_right_export{
+    padding: 0px 10px 30px 10px;
+    display: flex; /* Aligne les sous-conteneurs horizontalement */
+    flex-direction: column;
+    width: 80%;
+    overflow:auto;
+}
+.table_export {
+    margin-top: 20px; /* Ajoute un espacement de 20px par rapport au header */
+    width: 100%; /* Utilise toute la largeur disponible */
+    border-collapse: collapse; /* Supprime les espaces entre les bordures des cellules */
+}
+
+.table_export th, .table_export td {
+    padding: 8px;
+    border: 1px solid black; /* Bordure des cellules */
+    text-align: left; /* Alignement du texte */
+}

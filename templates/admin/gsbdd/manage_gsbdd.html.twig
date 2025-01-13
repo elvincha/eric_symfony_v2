@@ -1,0 +1,277 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class = "top">
+        <div class ="profile">
+            <img class="profil-img" src="{{ asset('images/logo-ministere.png') }}" alt="Profil" width="100" height="75">
+            <img class="profil-img" src="{{ asset('images/logo_ciec.PNG') }}" alt="Profil" width="150" height="75">
+        </div>
+        <H1>Evaluation des Résultats des Indicateurs du soutien Commissariat</H1>
+
+        <a href="{{ path('index') }}" class="btn-custom">Accéder à la partie user</a>
+        <a class="btn-custom">Se déconecter</a>
+    </div>
+    <div class="container_global">
+        <div class ="container_left">
+            <label> Acceuil E-habillement</label>
+            <li><a href="{{ path('gsbdd_manage') }}"> gérer les gsbdds</a></li>
+            <li><a href="{{ path('user_manage') }}"> gérer les users</a></li>
+            <li><a> gérer les admins</a>
+            <li><a href="{{ path('annonce_manage') }}"> gérer les anonces</a></li>
+            <li><a href="{{ path('app_export_csv') }}"> Export csv </a></li>
+            <li><a> gerer les paramètres </a></li>
+        </div>
+        <div class = "container_right_gsbdd">
+
+            <div class="container_gsbdd">
+                <h3>Gsbdd existant :</h3>
+                <div class = "table-wrapper">
+
+
+                    <table>
+
+                        <tbody>
+                        {% for gsbdd in gsbdds %}
+                            <tr>
+                                <td>{{ gsbdd.nomGsbdd }}</td>
+                                <td>
+                                    <button class="fill-gsbdd"
+                                            gsbdd_id ="{{ gsbdd.Idgsbdd }}"
+                                            gsbdd_nom ="{{ gsbdd.Nomgsbdd }}"
+                                            gsbdd_indic_ecole ="{{ gsbdd.IndicEcole }}"
+                                            gsbdd_indic_hors_ecole ="{{ gsbdd.IndicHorsEcole }}"
+                                            gsbdd_indic_opex ="{{ gsbdd.IndicOpexUnite }}"
+                                            gsbdd_indic_opex_isole ="{{ gsbdd.IndicOpexIsole }}"
+                                            onclick="get_user_by_gsbdd({{ gsbdd.Idgsbdd }})"
+                                    >
+                                        Modifier
+                                    </button>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class ='container_gsbdd'>
+                <h3>Ajout et modification :</h3>
+                <input type="hidden" id="input-gsbdd-id" name ="gsbdd_id">
+                <input type="text" id="input-gsbdd-name" name="gsbdd_name" placeholder="gsbdd">
+                <label>
+                    Indicateur Ecole :
+                    <input type="radio" id="input-indic_ecole-yes" name="indic_ecole" value="1"> Oui
+                    <input type="radio" id="input-indic_ecole-no" name="indic_ecole" value="0"> Non
+                </label>
+                <label>
+                    Indicateur Hors Ecole :
+                    <input type="radio" id="input-indic_hors_ecole-yes" name="indic_hors_ecole" value="1"> Oui
+                    <input type="radio" id="input-indic_hors_ecole-no" name="indic_hors_ecole" value="0"> Non
+                </label>
+                <label>
+                    Indicateur Opex :
+                    <input type="radio" id="input-opex-yes" name="indic_opex" value="1"> Oui
+                    <input type="radio" id="input-opex-no" name="indic_opex" value="0"> Non
+                </label>
+                <label>
+                    Indicateur Opex isole :
+                    <input type="radio" id="input-opex_isole-yes" name="indic_opex_isole" value="1"> Oui
+                    <input type="radio" id="input-opex_isole-no" name="indic_opex_isole" value="0"> Non
+                </label>
+
+                <div class="sous_div_btn">
+                    <button onclick="updateGsbdd()">Mettre à jour</button>
+                    <button>
+                        supprimer //////////
+                    </button>
+                </div>
+            </div>
+
+            <div class ='container_gsbdd'>
+                <h3>User présent : </h3>
+                <div class ="user_list">
+                    <ul id="user_list"></ul> <!-- Liste des ID d'utilisateurs sera affichée ici -->
+                </div>
+                <form id="add-acess-form" method="POST">
+
+                    <input type="text" id="add-user-session-input" name="user_session" placeholder="Nom de l'utilisateur">
+                    <button type="button" onclick="add_user_acess()">Ajouter</button>
+
+                </form>
+
+                <form id="delete-access-form" method="POST">
+                    <input type="text" id="user-session-input" name="user_session" placeholder="Nom de l'utilisateur">
+                    <input type="hidden" id="input-gsbdd-id2" name ="gsbdd_id">
+                    <button type="button" onclick="delete_user_access()">Supprimer</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        // Fonction pour remplir les champs quand on clique sur un bouton
+        document.querySelectorAll('.fill-gsbdd').forEach(button => {
+            button.addEventListener('click', function() {
+                // Récupérer les informations de l'utilisateur
+                const gsbdd_nom = this.getAttribute('gsbdd_nom');
+                const gsbdd_id = this.getAttribute('gsbdd_id');
+                const gsbdd_indic_ecole = this.getAttribute('gsbdd_indic_ecole') == '1';
+                const gsbdd_indic_hors_ecole = this.getAttribute('gsbdd_indic_hors_ecole') == '1';
+                const gsbdd_indic_opex = this.getAttribute('gsbdd_indic_opex') == '1';
+                const gsbdd_indic_opex_isole = this.getAttribute('gsbdd_indic_opex_isole') == '1';
+
+                // Remplir les champs d'entrée avec les données correspondantes
+                document.getElementById('input-gsbdd-name').value = gsbdd_nom;
+                document.getElementById('input-gsbdd-id').value = gsbdd_id;
+                document.getElementById('input-gsbdd-id2').value = gsbdd_id;
+
+                // Cocher la radio correspondant
+                document.getElementById('input-indic_ecole-yes').checked = gsbdd_indic_ecole;
+                document.getElementById('input-indic_ecole-no').checked = !gsbdd_indic_ecole;
+
+                document.getElementById('input-indic_hors_ecole-yes').checked = gsbdd_indic_hors_ecole;
+                document.getElementById('input-indic_hors_ecole-no').checked = !gsbdd_indic_hors_ecole;
+
+                document.getElementById('input-opex-yes').checked = gsbdd_indic_opex;
+                document.getElementById('input-opex-no').checked = !gsbdd_indic_opex;
+
+                document.getElementById('input-opex_isole-yes').checked = gsbdd_indic_opex_isole;
+                document.getElementById('input-opex_isole-no').checked = !gsbdd_indic_opex_isole;
+
+
+            });
+        });
+
+        function updateGsbdd() {
+            var id_gsbdd = document.getElementById('input-gsbdd-id').value;
+            var gsbdd_name = document.getElementById('input-gsbdd-name').value;
+            var indic_ecole = document.querySelector('input[name="indic_ecole"]:checked').value;
+            var indic_hors_ecole = document.querySelector('input[name="indic_hors_ecole"]:checked').value;
+            var indic_opex = document.querySelector('input[name="indic_opex"]:checked').value;
+            var indic_opex_isole = document.querySelector('input[name="indic_opex_isole"]:checked').value;
+            // Préparation de la requête AJAX
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '{{ path('update_gsbdd') }}', true); // Adapte cette route à la tienne
+            xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                    if (xhr.status === 200) {
+                        var response = JSON.parse(xhr.responseText);
+                        alert(response.status);  // Affiche le message dans une pop-up
+                        console.log('Page is reloading...');
+                        location.reload();  // Recharge la page après la mise à jour
+                    } else {
+                        var errorResponse = JSON.parse(xhr.responseText);
+                        alert('Erreur : ' + errorResponse.message);  // Affiche l'erreur
+                    }
+                }
+            };
+
+            // Envoi de la requête avec les données Gsbdd
+            xhr.send(JSON.stringify({
+                id_gsbdd: id_gsbdd,
+                gsbdd_name: gsbdd_name,
+                indic_ecole: indic_ecole,
+                indic_hors_ecole: indic_hors_ecole,
+                indic_opex: indic_opex,
+                indic_opex_isole: indic_opex_isole
+            }));
+        }
+
+        function get_user_by_gsbdd(id_gsbdd) {
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', '/gsbdd/users/' + id_gsbdd, true);
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                    var userList = document.getElementById('user_list');
+
+                    // Clear the previous list
+                    userList.innerHTML = '';
+
+                    if (xhr.status === 200) {
+                        var response = JSON.parse(xhr.responseText);
+                        var users = response.users;
+
+                        // Filter users with current_access = 1
+                        var filteredUsers = users.filter(function(user) {
+                            return user.current_acess === 1;
+                        });
+
+                        // Add each filtered user to the list with user_session
+                        filteredUsers.forEach(function(user) {
+                            var listItem = document.createElement('li');
+                            listItem.textContent = 'ID User: ' + user.id_user +
+                                ', User Session: ' + user.user_session +
+                                ', Current Access: ' + user.current_acess;
+                            userList.appendChild(listItem);
+                        });
+
+                        // If no users found with current_access = 1
+                        if (filteredUsers.length === 0) {
+                            var noUsersItem = document.createElement('li');
+                            noUsersItem.textContent = 'No users with current access = 1.';
+                            userList.appendChild(noUsersItem);
+                        }
+                    } else {
+                        // Instead of showing an alert, just clear the list
+                        var errorItem = document.createElement('li');
+                        errorItem.textContent = 'Error retrieving users. Please try again.';
+                        userList.appendChild(errorItem);
+                    }
+                }
+            };
+            xhr.send();
+        }
+
+
+
+        function delete_user_access() {
+            var userSession = document.getElementById('user-session-input').value;
+            var gsbddId = document.getElementById('input-gsbdd-id').value;
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '{{ path('delete_user_access') }}', true);
+            xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                    if (xhr.status === 200) {
+                        var response = JSON.parse(xhr.responseText);
+                        alert(response.status);
+                        location.reload();
+                    } else {
+                        var errorResponse = JSON.parse(xhr.responseText);
+                        alert('Erreur : ' + errorResponse.message);
+                    }
+                }
+            };
+            xhr.send(JSON.stringify({ id_user_session: userSession, gsbdd_id: gsbddId }));
+        }
+
+        function add_user_acess(){
+            var userSession = document.getElementById('add-user-session-input').value;
+            var gsbddId = document.getElementById('input-gsbdd-id').value;
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '{{ path('add_user_access') }}', true);
+            xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                    if (xhr.status === 200) {
+                        var response = JSON.parse(xhr.responseText);
+                        alert(response.status);
+                        location.reload();
+                    } else {
+                        var errorResponse = JSON.parse(xhr.responseText);
+                        alert('Erreur : ' + errorResponse.message);
+                    }
+                }
+            };
+            xhr.send(JSON.stringify({ id_user_session: userSession, gsbdd_id: gsbddId }));
+        }
+
+
+
+    </script>
+{%  endblock %}

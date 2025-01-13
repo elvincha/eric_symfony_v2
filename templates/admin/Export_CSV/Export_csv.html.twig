@@ -1,0 +1,135 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<div class = "top">
+    <label>ERIC</label>
+</div>
+<div class="container_global">
+    <div class ="container_left">
+        <label> Acceuil E-habillement</label>
+        <a href="{{ path('admin_home') }}" class="btn-custom">retour</a>
+        <ul class = table>
+            <li><a href="{{ path('gsbdd_manage') }}">Voir la liste des Gsbdd</a></li>
+            <li><a href="{{ path('gsbdd_manage') }}"> gérer les gsbdds</a></li>
+            <li><a href="{{ path('user_manage') }}"> gérer les users</a></li>
+            <li><a> gérer les admins</a>
+            <li><a href="{{ path('annonce_manage') }}"> gérer les anonces</a></li>
+            <li><a> gerer les paramètres </a></li>
+        </ul>
+    </div>
+    <div class="container_right_export">
+        <div class ="header container right">
+            <select id="typeFilter">
+                <option value="default">selectionner un taux</option>
+                <option value="taux école">Taux école</option>
+                <option value="taux hors école">Taux hors école</option>
+                <option value="taux opex unite">Taux opex unité</option>
+                <option value="taux opex isole">Taux opex isolé</option>
+            </select>
+
+            <input type="month" id="startDate">
+            <input type="month" id="endDate">
+            <button onclick="filterByDate()">Filtrer par date</button>
+            <button onclick="download_csv()">Télécharger</button>
+            <!--<button>Afficher</button>-->
+        </div>
+        <div class="container_right_export">
+            {{ include('admin/Export_csv/_table.html.twig', { saisies_taux: saisies_taux }) }}
+        </div>
+
+    </div>
+</div>
+
+
+    <script>
+        function filterSaisies() {
+            // Récupérer la valeur sélectionnée
+            var selectedType = document.getElementById('typeFilter').value;
+            // Créer une requête AJAX
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', '/export/csv/filter?type=' + encodeURIComponent(selectedType), true);
+
+            xhr.onload = function () {
+                if (xhr.status === 200) {
+                    var response = JSON.parse(xhr.responseText);
+
+                    // Mettre à jour l'ensemble du tableau
+                    document.querySelector('.container_right_export').innerHTML = response.html;
+                } else {
+                    alert("Une erreur est survenue !");
+                }
+            };
+
+            xhr.send();
+            window.location.href = `/export/csv/filter?type=${selectedType}`;
+        }
+        function download_csv() {
+            // Sélectionner le tableau à exporter
+            var table = document.querySelector('.container_right_export table');
+            if (!table) {
+                alert("Aucun tableau trouvé pour l'export !");
+                return;
+            }
+
+            // Construire le contenu CSV
+            var csv = [];
+            var rows = table.querySelectorAll('tr');
+
+            rows.forEach(function (row) {
+                var cells = row.querySelectorAll('th, td');
+                var rowData = [];
+                cells.forEach(function (cell) {
+                    rowData.push('"' + cell.innerText.replace(/"/g, '""') + '"');
+                });
+                csv.push(rowData.join(','));
+            });
+
+            // Ajouter le BOM pour gérer les caractères spéciaux
+            var csvContent = '\uFEFF' + csv.join('\n');
+
+            // Convertir les données CSV en Blob
+            var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+
+            // Créer un lien de téléchargement
+            var link = document.createElement('a');
+            var url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'table_export.csv');
+            link.style.display = 'none';
+
+            // Ajouter le lien à la page et simuler le clic
+            document.body.appendChild(link);
+            link.click();
+
+            // Nettoyer les ressources
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+        function filterByDate() {
+            // Récupérer les dates sélectionnées
+            var startDate = document.getElementById('startDate').value; // Format attendu : yyyy-mm
+            var endDate = document.getElementById('endDate').value;     // Format attendu : yyyy-mm
+            var selectedType = document.getElementById('typeFilter').value; // Type de taux sélectionné
+            // Validation des entrées
+            if (!startDate || !endDate) {
+                alert("Veuillez sélectionner une plage de dates !");
+                return;
+            }
+            // Créer une requête AJAX
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', `/export/csv/filterByDate?start=${encodeURIComponent(startDate)}&end=${encodeURIComponent(endDate)}&type=${encodeURIComponent(selectedType)}`, true);
+            xhr.onload = function () {
+                if (xhr.status === 200) {
+                    var response = JSON.parse(xhr.responseText);
+
+                    // Mettre à jour l'ensemble du tableau
+                    document.querySelector('.container_right_export').innerHTML = response.html;
+                } else {
+                    alert("Une erreur est survenue !");
+                }
+            };
+            xhr.send();
+            window.location.href = `/export/csv/filterByDate?start=${startDate}&end=${endDate}&type=${selectedType}`;
+         }
+    </script>
+{%  endblock %}

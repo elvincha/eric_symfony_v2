@@ -1,0 +1,179 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class = "top">
+        <div class ="profile">
+            <img class="profil-img" src="{{ asset('images/logo-ministere.png') }}" alt="Profil" width="100" height="75">
+            <img class="profil-img" src="{{ asset('images/logo_ciec.PNG') }}" alt="Profil" width="150" height="75">
+        </div>
+        <H1>Evaluation des Résultats des Indicateurs du soutien Commissariat</H1>
+
+        <a href="{{ path('index') }}" class="btn-custom">Accéder à la partie user</a>
+        <a class="btn-custom">Se déconecter</a>
+    </div>
+    <div class="container_global">
+        <div class ="container_left">
+            <label> Acceuil E-habillement</label>
+            <li><a href="{{ path('gsbdd_manage') }}">gérer les gsbdds</a></li>
+
+            <li><a href="{{ path('user_manage') }}"> gérer les users</a></li>
+            <li><a> gérer les admins</a>
+            <li><a href="{{ path('app_export_csv') }}"> Export csv </a></li>
+            <li><a href="{{ path('annonce_manage') }}"> gérer les anonces</a></li>
+            <li><a href="{{ path('app_export_csv') }}"> Export csv </a></li>
+        </div>
+        <div class = 'container'>
+            <div class = "div_vertical_left" >
+                <h1>Manage Users</h1>
+
+                <h2>Add a new user</h2>
+                {{ form_start(form) }}
+                {{ form_row(form.user_session) }}
+                {{ form_row(form.mail_adress) }}
+                <button type="submit">Add User</button>
+                {{ form_end(form) }}
+                <h2>Modify user</h2>
+                <form method="POST" >
+                    <div>
+                        <input type="hidden" id="input-id" name="id" value=""> <!-- ID caché du GSBdd -->
+                        <input type="text" id="input-user-session" name="user_session" placeholder="Session Utilisateur"> <!-- Input pour user session -->
+                        <input type="text" id="input-mail-adress" name="mail_adress" placeholder="Adresse Email"> <!-- Input pour mail adress -->
+                        <label>
+                            Actif :
+                            <input type="radio" id="input-active-yes" name="active" value="1"> Oui <!-- Radio pour "Actif" -->
+                            <input type="radio" id="input-active-no" name="active" value="0"> Non <!-- Radio pour "Non Actif" -->
+                        </label>
+                    </div>
+
+                    <button type="button" onclick="updateUser()">Modifier</button>
+                </form>
+                <div id="responseMessage"></div>
+            </div>
+            <div class = "div_vertical_right">
+                <h2>User List</h2>
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Admin</th>
+                        <th>Active</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for user in users %}
+                        {% if user.active == 1 %}
+                        <tr>
+                            <td>{{ user.usersession }}</td>
+                            <td>{{ user.mailadress }} </td>
+                            <td>{{ user.adminuser }}</td>
+                            <td>{{ user.active }}</td>
+                            <td>
+                                <button class="fill-user"
+                                        data-id="{{ user.id }}"
+                                        data-user-session="{{ user.usersession }}"
+                                        data-mail-adress="{{ user.mailadress }}"
+                                        data-active="{{ user.active }}">
+                                    Modifier
+                                </button>
+                            </td>
+                            <td>
+                                <button class="delete-user" data-id="{{ user.id }}">
+                                    Supprimer
+                                </button>
+                            </td>
+
+                        </tr>
+                        {% endif %}
+                    {% else %}
+                        <tr>
+                            <td colspan="5">No users found</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!--<div class="vertical">
+
+            </div>-->
+    </div>
+</div>
+    <script>
+
+        // Fonction pour remplir les champs quand on clique sur un bouton
+        document.querySelectorAll('.fill-user').forEach(button => {
+            button.addEventListener('click', function() {
+                // Récupérer les informations de l'utilisateur
+                const userId = this.getAttribute('data-id');
+                const userSession = this.getAttribute('data-user-session');
+                const mailAdress = this.getAttribute('data-mail-adress');
+                const isActive = this.getAttribute('data-active') == '1';
+
+                // Remplir les champs d'entrée avec les données correspondantes
+                document.getElementById('input-id').value = userId;
+                document.getElementById('input-user-session').value = userSession;
+                document.getElementById('input-mail-adress').value = mailAdress;
+
+                // Cocher la radio correspondant à "Actif" ou "Non Actif"
+                document.getElementById('input-active-yes').checked = isActive;
+                document.getElementById('input-active-no').checked = !isActive;
+            });
+        });
+
+        document.querySelectorAll('.delete-user').forEach(button => {
+            button.addEventListener('click', function() {
+                var userId = this.getAttribute('data-id'); // L'ID de l'utilisateur doit être stocké dans le bouton
+
+                if (confirm('Voulez-vous vraiment désactiver cet utilisateur ?')) {
+                    var xhr = new XMLHttpRequest();
+                    xhr.open('POST', '{{ path('delete_user') }}', true);
+                    xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+                    xhr.onreadystatechange = function () {
+                        if (xhr.readyState === XMLHttpRequest.DONE) {
+                            if (xhr.status === 200) {
+                                var response = JSON.parse(xhr.responseText);
+                                alert(response.status);  // Affiche le message dans une pop-up simple
+
+                                // Recharge la page pour actualiser la liste d'utilisateurs
+                                location.reload();
+                            } else {
+                                var errorResponse = JSON.parse(xhr.responseText);
+                                alert('Erreur : ' + errorResponse.message);  // Affiche une erreur dans une pop-up
+                            }
+                        }
+                    };
+                    xhr.send(JSON.stringify({ id_user: userId }));
+                }
+            });
+        });
+
+        function updateUser() {
+            var id_user = document.getElementById('input-id').value;
+            var user_session = document.getElementById('input-user-session').value;
+            var mail_adress = document.getElementById('input-mail-adress').value;
+            var active = document.querySelector('input[name="active"]:checked').value;
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '{{ path('update_user') }}', true);
+            xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                    if (xhr.status === 200) {
+                        var response = JSON.parse(xhr.responseText);
+                        alert(response.status);  // Affiche le message dans une pop-up simple
+                        console.log('Page is reloading...');
+                        location.reload();
+                        // recharge la page
+                    } else {
+                        var errorResponse = JSON.parse(xhr.responseText);
+                        alert('Erreur : ' + errorResponse.message);  // Affiche une erreur dans une pop-up
+                    }
+                }
+            };
+            xhr.send(JSON.stringify({ id_user: id_user, user_session: user_session, mail_adress: mail_adress, active: active }));
+        }
+
+    </script>
+
+{% endblock %}

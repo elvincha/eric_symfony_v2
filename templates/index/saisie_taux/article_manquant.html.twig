@@ -1,0 +1,134 @@
+<div>
+    <input type="text" id="search-article" placeholder="Recherchez un article..." />
+    <input type="text" id="nom_article"/>
+    <input type="text" id="nb_article" placeholder="nombre d'article(s)" />
+    <input type="text" id="id_siaisie" value="{{ id_saisie }}">
+    <button id="valider-btn" onclick="ajouterArticleManquant()">Valider</button>
+    <table id="search-results" border="1">
+        <thead>
+        <tr>
+            <th>Rag Article</th>
+            <th>Nom Article</th>
+            <th>Rad Article</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- Les résultats seront insérés ici -->
+        </tbody>
+    </table>
+</div>
+
+<script>
+    // Fonction pour effectuer la recherche
+    function searchArticles(query) {
+        fetch(`/article/recherche?q=${encodeURIComponent(query)}`)
+            .then(response => response.json())
+            .then(data => {
+                const resultsTableBody = document.querySelector('#search-results tbody');
+                resultsTableBody.innerHTML = ''; // Réinitialise les résultats précédents
+
+                // Ajout des résultats sous forme de lignes dans le tableau
+                data.forEach(article => {
+                    const tr = document.createElement('tr');
+
+                    const tdRag = document.createElement('td');
+                    tdRag.textContent = article.rag_article; // Affiche le rag_article
+                    tr.appendChild(tdRag);
+
+                    const tdNom = document.createElement('td');
+                    tdNom.textContent = article.nom_article; // Affiche le nom_article
+                    tr.appendChild(tdNom);
+
+                    const tdRad = document.createElement('td');
+                    tdRad.textContent = article.rad_article; // Affiche le rad_article
+                    tr.appendChild(tdRad);
+
+                    // Création du bouton "Ajouter"
+                    const tdButton = document.createElement('td');
+                    const button = document.createElement('button');
+                    button.textContent = 'Ajouter';
+                    button.classList.add('add-btn'); // Ajoute une classe pour le style si nécessaire
+                    button.dataset.id = article.id; // Ajoute l'ID de l'article au bouton
+                    button.dataset.rag = article.rag_article; // Ajoute la rag_article au bouton
+                    tdButton.appendChild(button);
+                    tr.appendChild(tdButton);
+
+                    // Ajoute la ligne du tableau au tbody
+                    resultsTableBody.appendChild(tr);
+                });
+            });
+    }
+
+    // Recherche dynamique des articles
+    document.getElementById('search-article').addEventListener('input', function () {
+        const query = this.value;
+
+        if (query.length > 3) { // Recherche uniquement après 4 caractères
+            searchArticles(query);
+        }
+    });
+
+    // Gestion du clic sur le bouton d'ajout
+    document.querySelector('#search-results').addEventListener('click', function (e) {
+        if (e.target.tagName === 'BUTTON') {
+            const articleId = e.target.dataset.id;
+            const articleNom = e.target.closest('tr').querySelector('td:nth-child(2)').textContent;
+            const articleRag = e.target.dataset.rag; // Récupère la rag_article de l'article sélectionné
+
+            // Met à jour l'input de recherche avec le rag_article de l'article sélectionné
+            document.getElementById('search-article').value = articleRag;
+            document.getElementById('nom_article').value = articleNom;
+            // Vous pouvez aussi remplir le champ nb_article ici si nécessaire
+            document.getElementById('nb_article').value = 1;
+
+            //alert(`Article sélectionné : ${articleNom} (ID: ${articleId}, Rag: ${articleRag})`);
+
+            // Pour remettre à jour le tableau après avoir sélectionné un article
+            searchArticles(articleRag); // Rechercher à nouveau en utilisant la rag_article sélectionnée
+        }
+    });
+    function ajouterArticleManquant() {
+        const articleRag = document.getElementById('search-article').value;
+        const nbArticle = document.getElementById('nb_article').value;
+        const nom_article = document.getElementById('nom_article').value;
+        // Récupérer l'ID Saisie depuis les paramètres de l'URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const idSaisie = urlParams.get('id_saisie');
+
+        if (!idSaisie || !articleRag || !nbArticle ||!nom_article) {
+            alert("Erreur : Les données sont incomplètes. Veuillez vérifier les champs.");
+            return;
+        }
+
+        // Envoi de la requête AJAX pour ajouter l'article manquant
+        fetch('/article/manquant/ajouter', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                id_saisie: idSaisie,
+                rag_article: articleRag,
+                nb_article: nbArticle,
+                nom_article : nom_article,
+            }),
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    alert(data.message);
+                } else {
+                    alert("Erreur lors de l'ajout de l'article manquant : " + (data.error || 'Erreur inconnue.'));
+                }
+            })
+            .catch(error => {
+                console.error("Erreur lors de l'ajout de l'article :", error);
+                alert("Erreur réseau lors de l'ajout de l'article.");
+            });
+    }
+
+
+
+
+</script>
